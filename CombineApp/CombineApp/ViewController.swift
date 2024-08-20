@@ -124,5 +124,6 @@ final class ViewController: UIViewController {
 
 
         subscribers.sinkData()
+        subscribers.assignSubs()
     }
 }

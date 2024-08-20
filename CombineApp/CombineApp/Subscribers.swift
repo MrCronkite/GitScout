@@ -15,6 +15,8 @@ final class SubscribersData {
 
     let data: Array<Int> = [1, 2, 3, 4, 5, 6, 78, 2]
 
+    private let assignExample = AssignExample(intValue: 0)
+
     func sinkData() { 
         let publisher = data.publisher
 
@@ -28,5 +30,25 @@ final class SubscribersData {
         } receiveValue: { value in
             print("current value: \(value)")
         }.store(in: &subs)
+    }
+
+    func assignSubs() {
+        let publisher = data.publisher
+
+        publisher
+            .assign(to: \AssignExample.intValue, on: assignExample)
+            .store(in: &subs)
+    }
+}
+
+final class AssignExample {
+    var intValue: Int {
+        didSet {
+            print("New value : \(intValue)")
+        }
+    }
+
+    init(intValue: Int) {
+        self.intValue = intValue
     }
 }
