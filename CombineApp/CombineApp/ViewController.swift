@@ -26,7 +26,9 @@ final class ViewController: UIViewController {
     //Data
     let singleData = "Vlad"
     let data = ["One", "Two", "Three"]
-    
+
+    private let subscribers = SubscribersData()
+
     let viewModel = ViewModel()
     let just = JustPublishers()
     let futurePublishers = FuturePublishers()
@@ -119,5 +121,8 @@ final class ViewController: UIViewController {
             }, receiveValue: { value in
                 print("Fibonacci: \(value)")
             }).store(in: &subscriptions)
+
+
+        subscribers.sinkData()
     }
 }
