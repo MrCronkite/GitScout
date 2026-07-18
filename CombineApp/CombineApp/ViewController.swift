@@ -8,14 +8,8 @@
 import UIKit
 import Combine
 
-struct User: Decodable {
-    let id: Int
-    let name: String
-}
-
-struct Post: Decodable {
-    let id: Int
-    let title: String
+struct Config: Decodable {
+    let featureFlags: [String: Bool]
 }
 
 
@@ -27,49 +21,31 @@ final class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        fetchUserPosts(userId: 1)
+        fetchConfigSafely()
             .sink { completion in
-                switch completion {
-                case .finished:
-                    print("Finished")
-
-                case .failure(let error):
-                    print("Error:", error.localizedDescription)
-                }
-            } receiveValue: { posts in
-                print(posts)
+                print(completion.featureFlags)
             }
             .store(in: &subscriptions)
+
     }
 
-    func fetchUserPosts(userId: Int) -> AnyPublisher<[Post], Error> {
-         fetchUser(id: userId)
-            .receive(on: DispatchQueue.main)
-            .flatMap { [weak self] user -> AnyPublisher<[Post], Error> in
-                guard let self else {
-                    return Fail(
-                        error: URLError(.cancelled)
-                    )
-                    .eraseToAnyPublisher()
-                }
-                return self.fetchPosts(userId: user.id)
+    func fetchConfigSafely() -> AnyPublisher<Config, Never> {
+        fetchConfig()
+            .retry(2)
+            .catch { error in
+                Just(Config(featureFlags: [:]))
             }
             .eraseToAnyPublisher()
     }
 
-    func fetchUser(id: Int) -> AnyPublisher<User, Error> {
-        let url = URL(string: "https://api.example.com/users/\(id)")!
+    func fetchConfig() -> AnyPublisher<Config, URLError> {
+        let url = URL(string: "https://api.example.com/config")!
         return URLSession.shared.dataTaskPublisher(for: url)
             .map(\.data)
-            .decode(type: User.self, decoder: JSONDecoder())
-            .eraseToAnyPublisher()
-    }
-
-    func fetchPosts(userId: Int) -> AnyPublisher<[Post], Error> {
-        let url = URL(string: "https://api.example.com/users/\(userId)/posts")!
-        return URLSession.shared.dataTaskPublisher(for: url)
-            .map(\.data)
-            .decode(type: [Post].self, decoder: JSONDecoder())
+            .decode(type: Config.self, decoder: JSONDecoder())
+            .mapError { error -> URLError in
+                error as? URLError ?? URLError(.unknown)
+            }
             .eraseToAnyPublisher()
     }
 }
