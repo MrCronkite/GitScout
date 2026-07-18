@@ -8,34 +8,26 @@
 import UIKit
 import Combine
 
-class TemperatureMonitor {
-    @Published var celsius: Double = 0
-
-    private var cancellable = Set<AnyCancellable>()
-
-    init() {
-        $celsius
-            .map { $0 * 9 / 5 + 32 }
-            .filter { $0 > 100 }
-            .sink {
-                 print("Внимание! Слишком жарко: \($0)°F")
-            }
-            .store(in: &cancellable)
-
-    }
-}
-
 
 final class ViewController: UIViewController {
     
     @IBOutlet weak var photoImageView: UIImageView!
 
-    let temp = TemperatureMonitor()
+    let a = PassthroughSubject<Int, Never>()
+    let b = PassthroughSubject<String, Never>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        temp.celsius = 40 
+        let cancellabel = Publishers.CombineLatest(a, b)
+            .sink { number, text in
+                print("\(number) - \(text)")
+            }
 
+        a.send(1)
+        b.send("A")
+        a.send(2)
+        b.send("B")
+        a.send(3)
     }
 }
