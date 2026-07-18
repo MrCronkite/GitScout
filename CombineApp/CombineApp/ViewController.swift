@@ -19,44 +19,57 @@ struct Post: Decodable {
 }
 
 
-class RegistrationForm {
-
-    @Published var email: String = ""
-    @Published var password: String = ""
-    @Published var confirmPassword: String = ""
-    @Published private(set) var isSubmitEnabled: Bool = false
-
-    init() {
-        Publishers.CombineLatest3(
-            $email,
-            $password,
-            $confirmPassword
-        )
-        .map { email, password, confirmPassword in
-            let emailValid = email.contains("@") && email.contains(".")
-            let passwordValid = password.count >= 8
-            let passwordsMatch = password == confirmPassword
-            return emailValid && passwordValid && passwordsMatch
-        }
-        .assign(to: &$isSubmitEnabled)
-    }
-}
-
-
 final class ViewController: UIViewController {
     
     @IBOutlet weak var photoImageView: UIImageView!
-
-    let registr = RegistrationForm()
+    private var subscriptions = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        registr.email = "1232@.re"
-        registr.password = "12345678"
-        registr.confirmPassword = "12345678"
+        fetchUserPosts(userId: 1)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("Finished")
 
-        print(registr.isSubmitEnabled)
+                case .failure(let error):
+                    print("Error:", error.localizedDescription)
+                }
+            } receiveValue: { posts in
+                print(posts)
+            }
+            .store(in: &subscriptions)
+    }
 
+    func fetchUserPosts(userId: Int) -> AnyPublisher<[Post], Error> {
+         fetchUser(id: userId)
+            .receive(on: DispatchQueue.main)
+            .flatMap { [weak self] user -> AnyPublisher<[Post], Error> in
+                guard let self else {
+                    return Fail(
+                        error: URLError(.cancelled)
+                    )
+                    .eraseToAnyPublisher()
+                }
+                return self.fetchPosts(userId: user.id)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    func fetchUser(id: Int) -> AnyPublisher<User, Error> {
+        let url = URL(string: "https://api.example.com/users/\(id)")!
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .map(\.data)
+            .decode(type: User.self, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
+    }
+
+    func fetchPosts(userId: Int) -> AnyPublisher<[Post], Error> {
+        let url = URL(string: "https://api.example.com/users/\(userId)/posts")!
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .map(\.data)
+            .decode(type: [Post].self, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
     }
 }
