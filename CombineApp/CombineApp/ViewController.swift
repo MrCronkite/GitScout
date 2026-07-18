@@ -8,26 +8,55 @@
 import UIKit
 import Combine
 
+struct User: Decodable {
+    let id: Int
+    let name: String
+}
+
+struct Post: Decodable {
+    let id: Int
+    let title: String
+}
+
+
+class RegistrationForm {
+
+    @Published var email: String = ""
+    @Published var password: String = ""
+    @Published var confirmPassword: String = ""
+    @Published private(set) var isSubmitEnabled: Bool = false
+
+    init() {
+        Publishers.CombineLatest3(
+            $email,
+            $password,
+            $confirmPassword
+        )
+        .map { email, password, confirmPassword in
+            let emailValid = email.contains("@") && email.contains(".")
+            let passwordValid = password.count >= 8
+            let passwordsMatch = password == confirmPassword
+            return emailValid && passwordValid && passwordsMatch
+        }
+        .assign(to: &$isSubmitEnabled)
+    }
+}
+
 
 final class ViewController: UIViewController {
     
     @IBOutlet weak var photoImageView: UIImageView!
 
-    let a = PassthroughSubject<Int, Never>()
-    let b = PassthroughSubject<String, Never>()
+    let registr = RegistrationForm()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let cancellabel = Publishers.Zip(a, b)
-            .sink { number, text in
-                print("\(number) - \(text)")
-            }
+        registr.email = "1232@.re"
+        registr.password = "12345678"
+        registr.confirmPassword = "12345678"
 
-        a.send(1)
-        b.send("A")
-        a.send(2)
-        b.send("B")
-        a.send(3)
+        print(registr.isSubmitEnabled)
+
     }
 }
