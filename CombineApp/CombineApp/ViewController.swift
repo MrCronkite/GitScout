@@ -19,7 +19,7 @@ final class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let cancellabel = Publishers.CombineLatest(a, b)
+        let cancellabel = Publishers.Zip(a, b)
             .sink { number, text in
                 print("\(number) - \(text)")
             }
