@@ -56,5 +56,38 @@ let cancellable = numbers
 
 <p>Реактивное программирование широко используется в разработке пользовательских интерфейсов, особенно при работе с асинхронными данными и событиями. Например, в мобильных приложениях оно помогает обрабатывать пользовательские действия, обновлять интерфейс в ответ на изменения данных, а также управлять сетевыми запросами и другими асинхронными операциями.</p>
 
+<h1 class="toggle-button">Publishers</h1>
+    <div class="content">
+        <h2>Основные Publishers</h2>
+        <ul>
+            <li><strong>Just</strong>: Немедленно отправляет одно значение и завершает.</li>
+            <li><strong>Future</strong>: Отправляет одно значение или ошибку в будущем.</li>
+            <li><strong>Deferred</strong>: Создает Publisher, когда кто-то подписывается.</li>
+            <li><strong>Empty</strong>: Немедленно завершает без отправки значений.</li>
+            <li><strong>Fail</strong>: Немедленно завершает с ошибкой.</li>
+            <li><strong>Record</strong>: Записывает последовательность значений и завершений.</li>
+        </ul>
+        <h2>Таймер и Расписание</h2>
+        <ul>
+            <li><strong>Timer.TimerPublisher</strong>: Отправляет значения по расписанию.</li>
+            <li><strong>Publishers.Sequence</strong>: Отправляет значения из последовательности.</li>
+        </ul>
+        <h2>Системные Publishers</h2>
+        <ul>
+            <li><strong>NotificationCenter.Publisher</strong>: Отправляет уведомления.</li>
+            <li><strong>URLSession.DataTaskPublisher</strong>: Отправляет результаты сетевых запросов.</li>
+        </ul>
+        <h2>Subject (Специальные Publishers, поддерживающие отправку значений вручную)</h2>
+        <ul>
+            <li><strong>PassthroughSubject</strong>: Отправляет значения подписчикам напрямую.</li>
+            <li><strong>CurrentValueSubject</strong>: Хранит текущее значение и отправляет его новым подписчикам.</li>
+        </ul>
+        <h2>Другие полезные Publishers</h2>
+        <ul>
+            <li><strong>Publishers.CombineLatest</strong>: Комбинирует последние значения из двух Publishers.</li>
+            <li><strong>Publishers.Merge</strong>: Объединяет выходные данные нескольких Publishers.</li>
+            <li><strong>Publishers.Zip</strong>: Объединяет значения из нескольких Publishers по парам.</li>
+        </ul>
+    </div>
 
 
