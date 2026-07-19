@@ -8,44 +8,48 @@
 import UIKit
 import Combine
 
-struct Config: Decodable {
-    let featureFlags: [String: Bool]
+struct User: Decodable {
+    let id: Int
+    let name: String
+}
+
+final class NetworkApi {
+
+    func search(_ query: String) -> AnyPublisher<[User], Error> {
+
+        let url = URL(
+            string: "https://api.example.com/users?q=\(query)"
+        )!
+
+        return URLSession.shared
+            .dataTaskPublisher(for: url)
+            .map(\.data)
+            .decode(
+                type: [User].self,
+                decoder: JSONDecoder()
+            )
+            .eraseToAnyPublisher()
+    }
 }
 
 
 final class ViewController: UIViewController {
     
     @IBOutlet weak var photoImageView: UIImageView!
-    private var subscriptions = Set<AnyCancellable>()
+
+    var subscriptions = Set<AnyCancellable>()
+
+    let subject = CurrentValueSubject<Int, Never>(0)
+
+    let vm = UsersViewModel(api: NetworkApi())
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        fetchConfigSafely()
-            .sink { completion in
-                print(completion.featureFlags)
-            }
-            .store(in: &subscriptions)
+        vm.query = "234"
 
-    }
+        print(vm.error)
+        print(vm.users)
 
-    func fetchConfigSafely() -> AnyPublisher<Config, Never> {
-        fetchConfig()
-            .retry(2)
-            .catch { error in
-                Just(Config(featureFlags: [:]))
-            }
-            .eraseToAnyPublisher()
-    }
-
-    func fetchConfig() -> AnyPublisher<Config, URLError> {
-        let url = URL(string: "https://api.example.com/config")!
-        return URLSession.shared.dataTaskPublisher(for: url)
-            .map(\.data)
-            .decode(type: Config.self, decoder: JSONDecoder())
-            .mapError { error -> URLError in
-                error as? URLError ?? URLError(.unknown)
-            }
-            .eraseToAnyPublisher()
     }
 }
