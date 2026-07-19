@@ -8,25 +8,39 @@
 import UIKit
 import Combine
 
-final class ViewModel {
-    let network = Network()
-    var subs: Set<AnyCancellable> = []
-    
-    init() {
-        network.requestComplete.sink { result in
-            print(result)
-        }.store(in: &subs)
-    }
-    
-    func requestSomething() {
-        network.send()
-    }
-    
-    func loadData(urlString: String, closure: @escaping (UIImage) -> Void) {
-        network.getImageData(urlString: urlString).sink(receiveCompletion: { completion in
-            print("Success photo data")
-        }, receiveValue: { data in
-            closure(UIImage(data: data) ?? UIImage())
-        }).store(in: &subs)
+final class UsersViewModel {
+
+    private var subscriptions = Set<AnyCancellable>()
+
+    @Published var query = ""
+
+    @Published var users: [User] = []
+
+    @Published var error: Error?
+
+    private let api: NetworkApi
+
+
+    init(api: NetworkApi) {
+        self.api = api
+
+        $query
+            .debounce(
+                for: .milliseconds(500),
+                scheduler: DispatchQueue.main
+            )
+            .removeDuplicates()
+            .flatMap { query in
+                self.api.search(query)
+                    .catch { error -> Just<[User]> in
+                        self.error = error
+                        return Just([])
+                    }
+            }
+            .receive(on: DispatchQueue.main)
+            .sink { users in
+                self.users = users
+            }
+            .store(in: &subscriptions)
     }
 }
