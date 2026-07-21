@@ -32,24 +32,80 @@ final class NetworkApi {
     }
 }
 
+enum TimeoutError: Error {
+    case exceeded
+}
+
 
 final class ViewController: UIViewController {
-    
+
     @IBOutlet weak var photoImageView: UIImageView!
 
     var subscriptions = Set<AnyCancellable>()
 
-    let subject = CurrentValueSubject<Int, Never>(0)
-
     let vm = UsersViewModel(api: NetworkApi())
+
+    let searchSubject = PassthroughSubject<String, Never>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        vm.query = "234"
+        Task {
+            // Тест 1: успех
+            print("Test 1: Fast operation")
+            do {
+                let result = try await operationWithTimeout(timeout: .seconds(1)) {
+                    try await Task.sleep(for: .milliseconds(100))
+                    return "Success"
+                }
+                print("Result: \(result)")  // Success
+            } catch {
+                print("Error: \(error)")
+            }
 
-        print(vm.error)
-        print(vm.users)
+            // Тест 2: timeout
+            print("\nTest 2: Slow operation")
+            do {
+                let result = try await operationWithTimeout(timeout: .milliseconds(100)) {
+                    try await Task.sleep(for: .seconds(1))
+                    return "Success"
+                }
+                print("Result: \(result)")
+            } catch is TimeoutError {
+                print("Timeout!")  // Timeout!
+            }
+        }
 
+    }
+
+    func operationWithTimeout<T>(
+        timeout: Duration,
+        operation: @escaping () async throws -> T
+    ) async throws -> T {
+
+
+        return try await withThrowingTaskGroup(of: T.self) { group in
+
+            group.addTask {
+                return try await operation()
+            }
+
+            group.addTask {
+                try await Task.sleep(for: timeout)
+                throw TimeoutError.exceeded
+            }
+
+            do {
+                guard let result = try await group.next() else {
+                    throw TimeoutError.exceeded
+                }
+
+                group.cancelAll()
+                return result
+            } catch is TimeoutError {
+                group.cancelAll()
+                throw TimeoutError.exceeded
+            }
+        }
     }
 }
