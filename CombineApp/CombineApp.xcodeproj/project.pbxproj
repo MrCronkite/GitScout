@@ -11,7 +11,6 @@
 		84894CFC2C597ED700E60E44 /* FibanachiPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84894CFB2C597ED700E60E44 /* FibanachiPublisher.swift */; };
 		849EA3E32C5415AF008F9528 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EA3E22C5415AF008F9528 /* Network.swift */; };
 		849EA3E52C541645008F9528 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EA3E42C541645008F9528 /* ViewModel.swift */; };
-		849EA3E72C558FD6008F9528 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 849EA3E62C558FD6008F9528 /* ViewController.xib */; };
 		849EA3E92C56375D008F9528 /* Publishers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EA3E82C56375D008F9528 /* Publishers.swift */; };
 		84ADD7122C52D13B0082F164 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ADD7112C52D13B0082F164 /* AppDelegate.swift */; };
 		84ADD7142C52D13B0082F164 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ADD7132C52D13B0082F164 /* SceneDelegate.swift */; };
@@ -25,7 +24,6 @@
 		84894CFB2C597ED700E60E44 /* FibanachiPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FibanachiPublisher.swift; sourceTree = "<group>"; };
 		849EA3E22C5415AF008F9528 /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		849EA3E42C541645008F9528 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
-		849EA3E62C558FD6008F9528 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
 		849EA3E82C56375D008F9528 /* Publishers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Publishers.swift; sourceTree = "<group>"; };
 		84ADD70E2C52D13B0082F164 /* CombineApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CombineApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84ADD7112C52D13B0082F164 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -74,7 +72,6 @@
 				84ADD71F2C52D13C0082F164 /* Info.plist */,
 				849EA3E22C5415AF008F9528 /* Network.swift */,
 				849EA3E42C541645008F9528 /* ViewModel.swift */,
-				849EA3E62C558FD6008F9528 /* ViewController.xib */,
 				849EA3E82C56375D008F9528 /* Publishers.swift */,
 				84894CFB2C597ED700E60E44 /* FibanachiPublisher.swift */,
 				840908882C750D12004DC83D /* Subscribers.swift */,
@@ -141,7 +138,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				84ADD71E2C52D13C0082F164 /* LaunchScreen.storyboard in Resources */,
-				849EA3E72C558FD6008F9528 /* ViewController.xib in Resources */,
 				84ADD71B2C52D13C0082F164 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
