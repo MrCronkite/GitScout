@@ -17,23 +17,52 @@ final class ExperementalView {
     init() {}
 
     func start() async {
-        do {
-            let user = try await fetchUser(id: "1")
-            print(user)
-        } catch {
-            print(error.localizedDescription)
-        }
-    }
-
-    func fetchUser(id: String) async throws -> User {
-
-        guard let url = URL(string: "https://api.example/users/\(id)") else {
-            throw URLError(.badURL)
+        let task = Task {
+            do {
+                let users = try await fetchUsers(ids: ["1", "2", "3", "4", "5"])
+                print(users)
+            } catch is CancellationError {
+                print("cancelation")
+            } catch {
+                print(error.localizedDescription)
+            }
         }
 
-        let (data, _) = try await URLSession.shared.data(from: url)
+        try? await Task.sleep(for: .milliseconds(500))
 
-        return try JSONDecoder().decode(User.self, from: data)
+        task.cancel()
     }
 
+    func fetchUsers(ids: [String]) async throws -> [User] {
+
+        var users = Array<User?>(repeating: nil, count: ids.count)
+
+        try await withThrowingTaskGroup(of: (Int, User).self) { [weak self] group in
+            guard let self else { throw CancellationError() }
+
+            for (index, id) in ids.enumerated() {
+                group.addTask {
+                    let user = try await self.fetchUser(id)
+                    return (index, user)
+                }
+            }
+
+            for try await (index, user) in group {
+                users[index] = user
+            }
+        }
+
+        return users.compactMap { $0 }
+
+    }
+
+    func fetchUser(_ id: String) async throws -> User {
+        try Task.checkCancellation()
+
+        try await Task.sleep(for: .milliseconds(500))
+
+        try Task.checkCancellation()
+
+        return User(id: Int(id) ?? 0, name: "nil")
+    }
 }
