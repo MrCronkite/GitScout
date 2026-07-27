@@ -7,37 +7,33 @@
 
 import UIKit
 
+struct User: Decodable {
+    let id: Int
+    let name: String
+}
+
 final class ExperementalView {
 
     init() {}
 
     func start() async {
-        let users = await fetchUsers(ids: [1, 2, 3, 4, 5])
-        print(users)
+        do {
+            let user = try await fetchUser(id: "1")
+            print(user)
+        } catch {
+            print(error.localizedDescription)
+        }
     }
 
-    func fetchUser(id: Int) async -> String {
-        try? await Task.sleep(for: .seconds(1))
-        return "User \(id)"
-    }
+    func fetchUser(id: String) async throws -> User {
 
-    func fetchUsers(ids: [Int]) async -> [String] {
-        var users = Array(repeating: "", count: ids.count)
-
-        await withTaskGroup(of: (Int, String).self) { group in
-
-            for (index, id) in ids.enumerated() {
-                group.addTask {
-                    (index, await self.fetchUser(id: id))
-                }
-            }
-
-            while let (index, user) = await group.next() {
-                users[index] = user
-            }
+        guard let url = URL(string: "https://api.example/users/\(id)") else {
+            throw URLError(.badURL)
         }
 
-        return users
+        let (data, _) = try await URLSession.shared.data(from: url)
 
+        return try JSONDecoder().decode(User.self, from: data)
     }
+
 }
