@@ -12,6 +12,41 @@ struct User: Decodable {
     let name: String
 }
 
+actor ImageCache {
+    private var cache: [String: UIImage] = [:]
+    private var loadingImages: [String: Task<UIImage, Error>] = [:]
+
+    func image(for key: String) async throws -> UIImage? {
+        if let cached = cache[key] {
+            return cached
+        }
+
+        if let task = loadingImages[key] {
+            return try await task.value
+        }
+
+        let task = Task {
+            guard let url = URL(string: key) else { throw URLError(.badURL) }
+
+            let (data, _) = try await URLSession.shared.data(from: url)
+
+            guard let image = UIImage(data: data) else {
+                throw URLError(.cannotDecodeContentData)
+            }
+
+            return image
+        }
+
+        loadingImages[key] = task
+
+        defer { loadingImages[key] = nil }
+        
+        let valueImage = try await task.value
+        cache[key] = valueImage
+        return valueImage
+    }
+}
+
 final class ExperementalView {
 
     init() {}
