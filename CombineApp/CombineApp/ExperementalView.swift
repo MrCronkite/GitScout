@@ -5,7 +5,8 @@
 //  Created by Влад Шимченко on 23.07.2026.
 //
 
-import UIKit
+import SwiftUI
+import Combine
 
 struct TimeoutError: Error {}
 
@@ -44,50 +45,63 @@ actor ImageCache {
     }
 }
 
+struct User {
+    let id: Int
+    let name: String
+}
+
 final class ExperementalView {
 
     init() {}
 
     func start() async {
         do {
-            try await consumeScores()
-        } catch is TimeoutError {
-            print("TimeoutError")
+            let users = try await fetchAllUsers(ids: ["1", "2", "3", "4", "5", "6"])
+            print(users)
+        } catch is CancellationError {
+            print("CancellationError")
         } catch {
-            print("error")
+            print(error.localizedDescription)
         }
     }
 
-    func consumeScores() async throws {
-        var iterator = liveScores().makeAsyncIterator()
 
-        while true {
-            let next = try await withThrowingTaskGroup(of: Int?.self) { group -> Int? in
-                group.addTask { await iterator.next() }
+    func fetchAllUsers(ids: [String]) async throws -> [User] {
+        var users = Array<User?>(repeating: nil, count: ids.count)
+
+        let queue = AsyncStream<(Int, String)> { continuation in
+            for item in ids.enumerated() {
+                continuation.yield(item)
+            }
+
+            continuation.finish()
+        }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+           for _ in 0..<3 {
                 group.addTask {
-                    try await Task.sleep(for: .seconds(5))
-                    throw TimeoutError()
+                    for await (index, id) in queue {
+                        let user = try await self.fetchUser(id)
+
+                        users[index] = user
+                     }
                 }
-
-                defer { group.cancelAll() }
-                return try await group.next() ?? nil
-
             }
 
-            guard let score = next else { break }
-            print("Score:", score)
+           try await group.waitForAll()
         }
+
+        return users.compactMap { $0 }
     }
 
-    func liveScores() -> AsyncStream<Int> {
-        AsyncStream { continuation in
-            let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                continuation.yield(Int.random(in: 0...100))
-            }
-            continuation.onTermination = { _ in
-                timer.invalidate()
-            }
-        }
+    func fetchUser(_ id: String) async throws -> User {
+        try Task.checkCancellation()
+
+        try? await Task.sleep(for: .seconds(0.5))
+
+        try Task.checkCancellation()
+
+        return User(id: Int(id) ?? 0, name: "Vlad \(id)")
     }
 
 }
