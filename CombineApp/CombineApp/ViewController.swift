@@ -22,10 +22,12 @@ final class ViewController: UIViewController {
 
         let vm = WeatherViewModel(weatherService: services)
 
-        services.updateTemperature(12.7)
-        print(vm.temperature)
-
-
+        services.namePublisher.send("Alice")
+        services.agePublisher.send(25)
+        services.namePublisher.send("Bob")
+        services.cityPublisher.send("Berlin")
+        services.agePublisher.send(30)
+        services.cityPublisher.send("Munich")
 
 
     }

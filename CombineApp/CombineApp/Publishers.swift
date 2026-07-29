@@ -17,20 +17,37 @@ class WeatherViewModel: ObservableObject {
     init(weatherService: WeatherService) {
         self.weatherService = weatherService
 
-        weatherService.temperaturePublisher
-            .map { "\($0)°C" }
-            .sink { [weak self] temperature in
-                print(temperature)
-                self?.temperature = temperature
-            }
-            .store(in: &cancellables)
+        Publishers.Zip3(
+            weatherService.agePublisher,
+            weatherService.cityPublisher,
+            weatherService.namePublisher
+        ).sink {
+           print("B:", $0, $1, $2)
+        }
+        .store(in: &cancellables)
+
+        Publishers.CombineLatest3(
+            weatherService.agePublisher,
+            weatherService.cityPublisher,
+            weatherService.namePublisher
+        ).sink {
+           print("A:", $0, $1, $2)
+        }
+        .store(in: &cancellables)
+
+        Publishers.MergeMany(
+            weatherService.agePublisher.map(String.init).eraseToAnyPublisher(),
+            weatherService.cityPublisher.eraseToAnyPublisher(),
+            weatherService.namePublisher.eraseToAnyPublisher()
+        ).sink {
+            print("C:", $0)
+        }
+        .store(in: &cancellables)
     }
 }
 
 class WeatherService {
-    let temperaturePublisher = PassthroughSubject<Double, Never>()
-
-    func updateTemperature(_ value: Double) {
-        temperaturePublisher.send(value)
-    }
+    let namePublisher = PassthroughSubject<String, Never>()
+    let agePublisher = PassthroughSubject<Int, Never>()
+    let cityPublisher = PassthroughSubject<String, Never>()
 }
