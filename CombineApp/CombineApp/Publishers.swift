@@ -8,46 +8,32 @@
 import UIKit
 import Combine
 
-class WeatherViewModel: ObservableObject {
-    @Published var temperature: String = "1"
+class NetworkService {
+    func fetchData() -> AnyPublisher<String, Never> {
 
-    private let weatherService: WeatherService
-    private var cancellables = Set<AnyCancellable>()
-
-    init(weatherService: WeatherService) {
-        self.weatherService = weatherService
-
-        Publishers.Zip3(
-            weatherService.agePublisher,
-            weatherService.cityPublisher,
-            weatherService.namePublisher
-        ).sink {
-           print("B:", $0, $1, $2)
-        }
-        .store(in: &cancellables)
-
-        Publishers.CombineLatest3(
-            weatherService.agePublisher,
-            weatherService.cityPublisher,
-            weatherService.namePublisher
-        ).sink {
-           print("A:", $0, $1, $2)
-        }
-        .store(in: &cancellables)
-
-        Publishers.MergeMany(
-            weatherService.agePublisher.map(String.init).eraseToAnyPublisher(),
-            weatherService.cityPublisher.eraseToAnyPublisher(),
-            weatherService.namePublisher.eraseToAnyPublisher()
-        ).sink {
-            print("C:", $0)
-        }
-        .store(in: &cancellables)
+            Future { promise in
+                print("🌐 Making network request...")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    promise(.success("server response"))
+                }
+            }
+            .eraseToAnyPublisher()
     }
 }
 
-class WeatherService {
-    let namePublisher = PassthroughSubject<String, Never>()
-    let agePublisher = PassthroughSubject<Int, Never>()
-    let cityPublisher = PassthroughSubject<String, Never>()
+class ViewModel {
+    let service = NetworkService()
+    var cancellables = Set<AnyCancellable>()
+
+    func loadTwice() {
+        let publisher = service.fetchData().share()
+
+        publisher
+            .sink { print("Subscriber 1 got:", $0) }
+            .store(in: &cancellables)
+
+        publisher
+            .sink { print("Subscriber 2 got:", $0) }
+            .store(in: &cancellables)
+    }
 }

@@ -6,29 +6,31 @@
 //
 
 import UIKit
+import Combine
 
 final class ViewController: UIViewController {
 
     private let ev = ExperementalView()
 
+    let prices = PassthroughSubject<Double, Never>()
+    private var cancellable = Set<AnyCancellable>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        prices
+            .map { $0 * 1.2 }
+            .filter { $0 > 100 }
+            .sink { print($0) }
+            .store(in: &cancellable)
 
         Task {
             await ev.start()
         }
 
-        let services = WeatherService()
-
-        let vm = WeatherViewModel(weatherService: services)
-
-        services.namePublisher.send("Alice")
-        services.agePublisher.send(25)
-        services.namePublisher.send("Bob")
-        services.cityPublisher.send("Berlin")
-        services.agePublisher.send(30)
-        services.cityPublisher.send("Munich")
-
-
+        prices.send(50)
+        prices.send(90)
+        prices.send(150)
+        prices.send(80)
     }
 }
