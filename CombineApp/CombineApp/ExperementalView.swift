@@ -8,19 +8,26 @@
 import SwiftUI
 import Combine
 
+struct Temperature {
+    let celsius: Double
+}
+
 
 final class ExperementalView {
 
-    let numbers = [10, 20, 30].publisher
+    let counter = PassthroughSubject<Int, Never>()
     var cancellable = Set<AnyCancellable>()
 
     init() {}
 
     func start() async {
-        numbers.sink(
-            receiveCompletion: { print("Completion:", $0) } ,
-            receiveValue: { print("Value:", $0) }
-        )
-        .store(in: &cancellable)
+        counter.sink { print("Sub 1:", $0) }.store(in: &cancellable)
+
+        counter.send(1)
+        counter.send(2)
+
+        counter.sink { print("Sub 2:", $0) }.store(in: &cancellable)
+
+        counter.send(3)
     }
 }
