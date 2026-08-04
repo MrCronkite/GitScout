@@ -8,26 +8,40 @@
 import SwiftUI
 import Combine
 
-struct Temperature {
-    let celsius: Double
+class FlakyService {
+    private var attemptCount = 0
+
+    func request() -> AnyPublisher<String, Error> {
+        attemptCount += 1
+        let currentAttempt = attemptCount
+        print("Attempt #\(currentAttempt)")
+
+        if currentAttempt < 3 {
+            return Fail(error: URLError(.badServerResponse))
+                .eraseToAnyPublisher()
+        } else {
+            return Just("Success!")
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        }
+    }
 }
 
 
 final class ExperementalView {
 
-    let counter = PassthroughSubject<Int, Never>()
+    let service = FlakyService()
     var cancellable = Set<AnyCancellable>()
 
     init() {}
 
     func start() async {
-        counter.sink { print("Sub 1:", $0) }.store(in: &cancellable)
-
-        counter.send(1)
-        counter.send(2)
-
-        counter.sink { print("Sub 2:", $0) }.store(in: &cancellable)
-
-        counter.send(3)
+        service.request()
+            .retry(3)
+            .sink(
+                receiveCompletion: { print("Completion:", $0) },
+                receiveValue: { print("Value:", $0) }
+            )
+            .store(in: &cancellable)
     }
 }
