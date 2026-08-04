@@ -31,17 +31,37 @@ class FlakyService {
 final class ExperementalView {
 
     let service = FlakyService()
-    var cancellable = Set<AnyCancellable>()
+    var cancellables = Set<AnyCancellable>()
+
+    let events = PassthroughSubject<String, Never>()
+    let start = Date()
 
     init() {}
 
+    func elapsed() -> String {
+        String(format: "%.2fs", Date().timeIntervalSince(start))
+    }
+
     func start() async {
-        service.request()
-            .retry(3)
-            .sink(
-                receiveCompletion: { print("Completion:", $0) },
-                receiveValue: { print("Value:", $0) }
-            )
-            .store(in: &cancellable)
+        events
+            .delay(for: .seconds(2), scheduler: DispatchQueue.main)
+            .sink { value in
+                print("Received: \(value) at t=\(self.elapsed())")
+            }
+            .store(in: &cancellables)
+
+        Task {
+            print("send 'first' at t=\(elapsed())")
+            events.send("first")
+
+            try? await Task.sleep(for: .seconds(1))
+            print("send 'second' at t=\(elapsed())")
+            events.send("second")
+
+            try? await Task.sleep(for: .seconds(0.5))
+            print("send 'third' at t=\(elapsed())")
+            events.send("third")
+        }
+
     }
 }
