@@ -11,6 +11,7 @@ import Combine
 final class ViewController: UIViewController {
 
     private let ev = ExperementalView()
+    private let vm = UsersViewModel()
 
 
     private var cancellable = Set<AnyCancellable>()
