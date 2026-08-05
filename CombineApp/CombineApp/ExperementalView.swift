@@ -33,35 +33,57 @@ final class ExperementalView {
     let service = FlakyService()
     var cancellables = Set<AnyCancellable>()
 
-    let events = PassthroughSubject<String, Never>()
-    let start = Date()
+    let email = CurrentValueSubject<String, Never>("")
+    let password = CurrentValueSubject<String, Never>("")
+    let agreedToTerms = CurrentValueSubject<Bool, Never>(false)
+
+    let deposits = PassthroughSubject<Double, Never>()
 
     init() {}
 
-    func elapsed() -> String {
-        String(format: "%.2fs", Date().timeIntervalSince(start))
-    }
 
     func start() async {
-        events
-            .delay(for: .seconds(2), scheduler: DispatchQueue.main)
-            .sink { value in
-                print("Received: \(value) at t=\(self.elapsed())")
+        func observePrices() async {
+            for await price in deposits.values {
+                print("Price:", price)
+                if price > 100 {
+                    print("Price exceeded threshold, stopping")
+                    break
+                }
             }
-            .store(in: &cancellables)
-
-        Task {
-            print("send 'first' at t=\(elapsed())")
-            events.send("first")
-
-            try? await Task.sleep(for: .seconds(1))
-            print("send 'second' at t=\(elapsed())")
-            events.send("second")
-
-            try? await Task.sleep(for: .seconds(0.5))
-            print("send 'third' at t=\(elapsed())")
-            events.send("third")
+            print("Loop ended")
         }
 
+        Task {
+            await observePrices()
+
+            try? await Task.sleep(for: .seconds(3))
+
+            deposits.send(50)
+            deposits.send(80)
+            deposits.send(150)
+            deposits.send(30)
+        }
+    }
+
+    func fetchUserPublisher(id: String) -> AnyPublisher<String, Error> {
+        Deferred {
+            Future { promise in
+                Task {
+                    do {
+                        let user = try await self.fetchUserAsync(id: id)
+                        promise(.success(user))
+                    } catch {
+                        promise(.failure(error))
+                    }
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func fetchUserAsync(id: String) async throws -> String {
+        try await Task.sleep(for: .seconds(1))
+        return "User \(id)"
     }
 }
