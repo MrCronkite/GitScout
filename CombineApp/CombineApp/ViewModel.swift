@@ -7,40 +7,92 @@
 
 import UIKit
 import Combine
+import pthread
+
+
+actor StatusCollector {
+    private var statuses: [String: String] = [:]
+
+    func record(_ id: String, status: String) {
+        statuses[id] = status
+    }
+
+    func snapshot() -> [String: String] {
+        statuses
+    }
+}
+
+enum Event {
+    case stop
+}
 
 final class UsersViewModel {
 
-    private var subscriptions = Set<AnyCancellable>()
+    let statusCollect = StatusCollector()
 
-    @Published var query = ""
+    init() {
+        Task {
+        }
+    }
 
-    @Published var users: [User] = []
+    func checkServerStatus(id: String) async throws -> String {
+        let delay = Double.random(in: 0.5...3.0)
+        try await Task.sleep(for: .seconds(delay))
+        try Task.checkCancellation()
+        return "OK"
+    }
 
-    @Published var error: Error?
+    func collectStatuses(ids: [String]) async -> [String: String] {
 
-    private let api: NetworkApi
+        let stream = AsyncStream<Event> { continuation in
+            Task {
+                try? await Task.sleep(for: .seconds(2))
+                continuation.yield(.stop)
+                continuation.finish()
+            }
+        }
 
+        await withTaskGroup(of: Void.self) { group in
 
-    init(api: NetworkApi) {
-        self.api = api
+            group.addTask {
 
-        $query
-            .debounce(
-                for: .milliseconds(500),
-                scheduler: DispatchQueue.main
-            )
-            .removeDuplicates()
-            .flatMap { query in
-                self.api.search(query)
-                    .catch { error -> Just<[User]> in
-                        self.error = error
-                        return Just([])
+                await withTaskGroup(of: Void.self) { statusGroup in
+
+                    for id in ids {
+                        statusGroup.addTask {
+                            do {
+                                let status = try await self.checkServerStatus(id: id)
+
+                                await self.statusCollect.record(
+                                    id,
+                                    status: status
+                                )
+                            } catch {
+                                print(error)
+                            }
+                        }
                     }
+
+                    await statusGroup.waitForAll()
+                }
             }
-            .receive(on: DispatchQueue.main)
-            .sink { users in
-                self.users = users
+
+            group.addTask {
+
+                for await event in stream {
+
+                    if event == .stop {
+                        print("Timeout")
+
+                        group.cancelAll()
+                        break
+                    }
+                }
             }
-            .store(in: &subscriptions)
+
+            await group.waitForAll()
+        }
+
+        return await statusCollect.snapshot()
     }
 }
