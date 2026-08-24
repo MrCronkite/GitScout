@@ -17,12 +17,16 @@ enum SearchViewState {
     case error(String)
 }
 
+@MainActor
 final class SearchViewModel {
     let searchSubject = PassthroughSubject<String, Never>()
+    let didSelectRepo = PassthroughSubject<GitHubRepo, Never>()
     @Published private(set) var state: SearchViewState = .idle
 
     private let interactor: SearchInteractorProtocol
     private var cancellables = Set<AnyCancellable>()
+
+    private var lastLoadedRepos: [GitHubRepo] = []
 
     init(interactor: SearchInteractorProtocol) {
         self.interactor = interactor

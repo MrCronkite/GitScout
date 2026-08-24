@@ -17,7 +17,7 @@ struct GitHubSearchResponse: Decodable {
     }
 }
 
-struct GitHubRepo: Decodable {
+struct GitHubRepo: Decodable, Hashable {
     let id: Int
     let name: String
     let fullName: String
@@ -32,7 +32,7 @@ struct GitHubRepo: Decodable {
         case stargazersCount = "stargazers_count"
     }
 
-    struct Owner: Decodable {
+    struct Owner: Decodable, Hashable {
         let login: String
         let avatarUrl: String
 

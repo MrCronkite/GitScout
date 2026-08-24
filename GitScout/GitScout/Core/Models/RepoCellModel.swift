@@ -9,6 +9,7 @@ import Foundation
 
 // RepoCellModel.swift — UI-модель, отдельно от сырого ответа API
 struct RepoCellModel: Hashable {
+    let repo: GitHubRepo
     let id: Int
     let name: String
     let ownerName: String
@@ -18,6 +19,7 @@ struct RepoCellModel: Hashable {
     let language: String?
 
     init(repo: GitHubRepo) {
+        self.repo = repo
         self.id = repo.id
         self.name = repo.name
         self.ownerName = repo.owner.login

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		84B8FE13303485C6007CC5D2 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84B8FE12303485C6007CC5D2 /* SnapKit */; };
+		84C3CEF1303CB37D00C2635D /* AsyncPrimitivesKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84C3CEF0303CB37D00C2635D /* AsyncPrimitivesKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84C3CEF1303CB37D00C2635D /* AsyncPrimitivesKit in Frameworks */,
 				84B8FE13303485C6007CC5D2 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,6 +86,7 @@
 			name = GitScout;
 			packageProductDependencies = (
 				84B8FE12303485C6007CC5D2 /* SnapKit */,
+				84C3CEF0303CB37D00C2635D /* AsyncPrimitivesKit */,
 			);
 			productName = GitScout;
 			productReference = 84B8FDEA30348380007CC5D2 /* GitScout.app */;
@@ -115,6 +118,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				84B8FE11303485C6007CC5D2 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				84C3CEEF303CB37D00C2635D /* XCRemoteSwiftPackageReference "AsyncPrimitivesKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 84B8FDEB30348380007CC5D2 /* Products */;
@@ -372,6 +376,14 @@
 				minimumVersion = 6.0.0;
 			};
 		};
+		84C3CEEF303CB37D00C2635D /* XCRemoteSwiftPackageReference "AsyncPrimitivesKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MrCronkite/AsyncPrimitivesKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -379,6 +391,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84B8FE11303485C6007CC5D2 /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		84C3CEF0303CB37D00C2635D /* AsyncPrimitivesKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84C3CEEF303CB37D00C2635D /* XCRemoteSwiftPackageReference "AsyncPrimitivesKit" */;
+			productName = AsyncPrimitivesKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
