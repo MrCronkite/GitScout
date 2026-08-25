@@ -1,29 +1,28 @@
 //
-//  AppCoordinator.swift
+//  SearchCoordinator.swift
 //  GitScout
 //
-//  Created by Влад Шимченко on 18.08.2026.
+//  Created by Влад Шимченко on 25.08.2026.
 //
 
 import UIKit
 import Combine
 
-protocol Coordinator: AnyObject {
-    func start()
-}
-
-final class AppCoordinator: Coordinator {
+final class SearchCoordinator: Coordinator {
     private let navigationController: UINavigationController
+    private let persistenceController: PersistenceControllerProtocol
     private var cancellables = Set<AnyCancellable>()
 
-    init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController, persistenceController: PersistenceControllerProtocol) {
         self.navigationController = navigationController
+        self.persistenceController = persistenceController
     }
 
     func start() {
         let interactor = SearchInteractor()
         let searchViewModel = SearchViewModel(interactor: interactor)
         let searchVC = SearchViewController(viewModel: searchViewModel)
+        searchVC.tabBarItem = UITabBarItem(title: "Search", image: UIImage(systemName: "magnifyingglass"), tag: 0)
 
         searchViewModel.didSelectRepo
             .sink { [weak self] repo in
