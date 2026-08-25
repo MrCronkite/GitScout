@@ -49,9 +49,12 @@ final class DetailViewController: UIViewController {
         scrollView.addSubview(contentStack)
         contentStack.axis = .vertical
         contentStack.spacing = 16
+        contentStack.isLayoutMarginsRelativeArrangement = true
+        contentStack.layoutMargins = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+
         contentStack.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(16)
-            make.width.equalToSuperview().offset(-32)
+            make.edges.equalTo(scrollView.contentLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
         }
 
         avatarImageView.layer.cornerRadius = 32
