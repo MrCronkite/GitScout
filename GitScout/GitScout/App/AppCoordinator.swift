@@ -15,6 +15,7 @@ protocol Coordinator: AnyObject {
 final class AppCoordinator: Coordinator {
     private let window: UIWindow
     private let persistenceController: PersistenceControllerProtocol
+    private let favoritesStorage: FavoritesStorageProtocol
     private let tabBarController = UITabBarController()
 
     private var searchCoordinator: SearchCoordinator?
@@ -23,14 +24,24 @@ final class AppCoordinator: Coordinator {
     init(window: UIWindow, persistenceController: PersistenceControllerProtocol) {
         self.window = window
         self.persistenceController = persistenceController
+        self.favoritesStorage = FavoritesStorage(persistenceController: persistenceController)
     }
 
     func start() {
         let searchNav = UINavigationController()
         let favoritesNav = UINavigationController()
 
-        let searchCoordinator = SearchCoordinator(navigationController: searchNav, persistenceController: persistenceController)
-        let favoritesCoordinator = FavoritesCoordinator(navigationController: favoritesNav, persistenceController: persistenceController)
+        let searchCoordinator = SearchCoordinator(
+            navigationController: searchNav,
+            persistenceController: persistenceController,
+            favoritesStorage: favoritesStorage
+        )
+
+        let favoritesCoordinator = FavoritesCoordinator(
+            navigationController: favoritesNav,
+            persistenceController: persistenceController,
+            favoritesStorage: favoritesStorage
+        )
 
         self.searchCoordinator = searchCoordinator
         self.favoritesCoordinator = favoritesCoordinator

@@ -11,11 +11,17 @@ import Combine
 final class SearchCoordinator: Coordinator {
     private let navigationController: UINavigationController
     private let persistenceController: PersistenceControllerProtocol
+    private let favoritesStorage: FavoritesStorageProtocol
     private var cancellables = Set<AnyCancellable>()
 
-    init(navigationController: UINavigationController, persistenceController: PersistenceControllerProtocol) {
+    init(
+        navigationController: UINavigationController,
+        persistenceController: PersistenceControllerProtocol,
+        favoritesStorage: FavoritesStorageProtocol
+    ) {
         self.navigationController = navigationController
         self.persistenceController = persistenceController
+        self.favoritesStorage = favoritesStorage
     }
 
     func start() {
@@ -35,7 +41,11 @@ final class SearchCoordinator: Coordinator {
 
     private func showDetail(for repo: GitHubRepo) {
         let interactor = DetailInteractor()
-        let viewModel = DetailViewModel(repo: repo, interactor: interactor)
+        let viewModel = DetailViewModel(
+            repo: repo,
+            interactor: interactor,
+            favoritesStorage: favoritesStorage
+        )
         let detailVC = DetailViewController(viewModel: viewModel)
         navigationController.pushViewController(detailVC, animated: true)
     }

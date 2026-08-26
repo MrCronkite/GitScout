@@ -40,6 +40,13 @@ final class DetailViewController: UIViewController {
         setupLayout()
         configureInitial()
         bindViewModel()
+
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "star"),
+            style: .plain,
+            target: self,
+            action: #selector(favoriteTapped)
+        )
     }
 
     private func setupLayout() {
@@ -98,10 +105,11 @@ final class DetailViewController: UIViewController {
     }
 
     private func bindViewModel() {
-        viewModel.$state
+        viewModel.$isFavorite
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                self?.render(state)
+            .sink { [weak self] isFavorite in
+                let iconName = isFavorite ? "star.fill" : "star"
+                self?.navigationItem.rightBarButtonItem?.image = UIImage(systemName: iconName)
             }
             .store(in: &cancellables)
     }
@@ -131,6 +139,10 @@ final class DetailViewController: UIViewController {
         guard case .loaded(let detail) = viewModel.state,
               let url = URL(string: detail.htmlUrl) else { return }
         UIApplication.shared.open(url)
+    }
+
+    @objc private func favoriteTapped() {
+        viewModel.toggleFavorite()
     }
 
     private func loadAvatar(from url: URL) {

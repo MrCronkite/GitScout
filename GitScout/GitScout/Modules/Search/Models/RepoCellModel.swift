@@ -36,3 +36,20 @@ struct RepoCellModel: Hashable {
         return "\(count)"
     }
 }
+
+extension RepoCellModel {
+    init(favorite: FavoriteRepo) {
+        // Восстанавливаем GitHubRepo из сохранённых полей — нужен для навигации в Detail
+        let owner = GitHubRepo.Owner(login: favorite.ownerLogin, avatarUrl: favorite.avatarUrl)
+        let repo = GitHubRepo(
+            id: Int(favorite.id),
+            name: favorite.name,
+            fullName: "\(favorite.ownerLogin)/\(favorite.name)",
+            description: favorite.repoDescription,
+            stargazersCount: Int(favorite.stargazersCount),
+            language: favorite.language,
+            owner: owner
+        )
+        self.init(repo: repo)
+    }
+}
