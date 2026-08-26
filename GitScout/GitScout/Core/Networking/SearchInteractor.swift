@@ -13,12 +13,6 @@ protocol SearchInteractorProtocol {
     func search(query: String) -> AnyPublisher<[GitHubRepo], Error>
 }
 
-enum NetworkError: Error {
-    case invalidURL
-    case decoding(Error)
-    case server(Error)
-}
-
 final class SearchInteractor: SearchInteractorProtocol {
     private let session: URLSession
     private let decoder: JSONDecoder
