@@ -9,7 +9,7 @@ import UIKit
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-    private var appCoordinator: AppCoordinator?
+    private var rootCoordinator: RootCoordinator?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
@@ -17,11 +17,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
 
         let persistenceController = PersistenceController()
-        let coordinator = AppCoordinator(
-            window: window,
-            persistenceController: persistenceController
-        )
-        appCoordinator = coordinator
+        let coordinator = RootCoordinator(window: window, persistenceController: persistenceController)
+        rootCoordinator = coordinator
         coordinator.start()
     }
 }
